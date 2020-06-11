@@ -4,24 +4,25 @@ from websocket_server import WebsocketServer
 import json
 import time
 import io
+
+
 nicks = {}
 vehicles = {}
 capture = {}
 
 
-# Called for every client connecting (after handshake)
-
 def new_client(client, server):
     print('Client connected')
 
 
-# Called for every client disconnecting
 
 def client_left(client, server):
     print('Client(%d) disconnected' % client['id'])
+    global nicks
+    nicks = {}
 
 
-# Called when a client sends a message
+
 
 def message_received(client, server, message):
     info = json.loads(message)
@@ -41,7 +42,6 @@ def message_received(client, server, message):
                     'health': info['sender']['health'],
                     'x': info['sender']['pos']['x'],
                     'y': info['sender']['pos']['y'],
-                    'z': info['sender']['pos']['z'],
                     }})
             else:
                 if nicks[info['sender']['sender']]['timestamp'] \
@@ -52,7 +52,6 @@ def message_received(client, server, message):
                         'health': info['sender']['health'],
                         'x': info['sender']['pos']['x'],
                         'y': info['sender']['pos']['y'],
-                        'z': info['sender']['pos']['z'],
                         }})
         if 'vehicles' in info:
             inf = info['vehicles']
@@ -67,7 +66,6 @@ def message_received(client, server, message):
                             'healthstamp': time.time(),
                             'x': a['pos']['x'],
                             'y': a['pos']['y'],
-                            'z': a['pos']['z'],
                             }})
                     else:
                         vehicles.update({a['id']: {
@@ -78,7 +76,6 @@ def message_received(client, server, message):
                             'health': 'xz',
                             'healthstamp': time.time(),
                             'y': a['pos']['y'],
-                            'z': a['pos']['z'],
                             }})
                 else:
                     if vehicles[a['id']]['timestamp'] < time.time():
@@ -91,7 +88,6 @@ def message_received(client, server, message):
                                 'healthstamp': time.time(),
                                 'x': a['pos']['x'],
                                 'y': a['pos']['y'],
-                                'z': a['pos']['z'],
                                 }})
                         else:
                             vehicles.update({a['id']: {
@@ -103,7 +99,6 @@ def message_received(client, server, message):
                                         ]]['healthstamp'],
                                 'x': a['pos']['x'],
                                 'y': a['pos']['y'],
-                                'z': a['pos']['z'],
                                 }})
         answer = {}
         answer['nicks'] = nicks
@@ -114,7 +109,7 @@ def message_received(client, server, message):
 
 
 PORT = 8993
-server = WebsocketServer(PORT, 'localhost')
+server = WebsocketServer(PORT, '185.238.0.84')
 server.set_fn_new_client(new_client)
 server.set_fn_client_left(client_left)
 server.set_fn_message_received(message_received)
